@@ -19,6 +19,28 @@ class UploadHandler {
     protected $uploadName;
 
     /**
+     * This will retrieve the "intended" request method.  Normally, this is the
+     * actual method of the request.  Sometimes, though, the intended request method
+     * must be hidden in the parameters of the request.  For example, when attempting to
+     * delete a file using a POST request. In that case, "DELETE" will be sent along with
+     * the request in a "_method" parameter.
+     * @return string HTTP method used for the request. E.g., DELETE, POST, etc.
+     */
+    public static function get_request_method() {
+        global $HTTP_RAW_POST_DATA;
+
+        if(isset($HTTP_RAW_POST_DATA)) {
+            parse_str($HTTP_RAW_POST_DATA, $_POST);
+        }
+
+        if (isset($_POST["_method"]) && $_POST["_method"] != null) {
+            return $_POST["_method"];
+        }
+
+        return $_SERVER["REQUEST_METHOD"];
+    }
+
+    /**
      * Get the original filename
      */
     public function getName(){
@@ -138,7 +160,7 @@ class UploadHandler {
         if($file['error']) {
             return array('error' => 'Upload Error #'.$file['error']);
         }
-        	
+
         // Validate name
         if ($name === null || $name === ''){
             return array('error' => 'File name empty.');
@@ -223,7 +245,7 @@ class UploadHandler {
 
         $targetFolder = $uploadDirectory;
         $uuid = false;
-        $method = $_SERVER["REQUEST_METHOD"];
+        $method = self::get_request_method();
 	    if ($method == "DELETE") {
             $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
             $tokens = explode('/', $url);
