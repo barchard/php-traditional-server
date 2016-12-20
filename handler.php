@@ -245,7 +245,7 @@ class UploadHandler {
 
         $targetFolder = $uploadDirectory;
         $uuid = false;
-        $method = self::get_request_method();
+        $method = $_SERVER["REQUEST_METHOD"];
 	    if ($method == "DELETE") {
             $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
             $tokens = explode('/', $url);
